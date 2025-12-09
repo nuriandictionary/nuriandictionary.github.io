@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Google Sheet Table</title>
+
+<style>
+    
+
+    body {
+        font-family: "Noto Sans KR", sans-serif;
+        background: #f5f6fa;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .table-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 90%;
+        max-width: 1200px;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+    }
+
+    th {
+        background: #2d98da;
+        color: white;
+        font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+        background: #f8f9fc;
+    }
+
+    tr:hover {
+        background: #eaf6ff;
+    }
+</style>
+</head>
+
+<body>
+
+<h2>Google Sheet 데이터</h2>
+
+<div class="table-container">
+    <table id="sheetTable"></table>
+</div>
+
+<script>
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnFw93yJL8iErEucZ6uj5xzd8c1hcZohkEU811_EbZKxFfO2-Y0lpPx4rVV0Prae8LCG44n3f33iET/pub?output=csv";
+
+// CSV 파서
+function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let cell = "";
+    let insideQuote = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"' && nextChar === '"') {
+            cell += '"';
+            i++;
+        } else if (char === '"') {
+            insideQuote = !insideQuote;
+        } else if (char === ',' && !insideQuote) {
+            row.push(cell);
+            cell = "";
+        } else if (char === '\n' && !insideQuote) {
+            row.push(cell);
+            rows.push(row);
+            row = [];
+            cell = "";
+        } else {
+            cell += char;
+        }
+    }
+
+    if (cell || row.length) {
+        row.push(cell);
+        rows.push(row);
+    }
+
+    return rows;
+}
+
+async function loadSheet() {
+    try {
+        const res = await fetch(sheetURL);
+        const csv = await res.text();
+
+        let rows = parseCSV(csv);
+        const table = document.getElementById("sheetTable");
+
+        // 헤더 추출
+        const headers = rows[0];
+
+        // score 컬럼 제거
+        const scoreIndex = headers.indexOf("score");
+        if (scoreIndex !== -1) {
+            rows = rows.map(r => r.filter((_, i) => i !== scoreIndex));
+        }
+
+        // ⚡ pubdate → title → link 순서로 재배열
+        const orderedColumns = ["pubdate", "title", "link"];
+        const colIndexes = orderedColumns.map(col => headers.indexOf(col));
+
+        rows = rows.map(r => colIndexes.map(i => r[i]));
+
+        // 테이블 출력
+        table.innerHTML = "";
+
+        rows.forEach((row, i) => {
+            const tr = document.createElement("tr");
+
+            row.forEach(col => {
+                const cell = document.createElement(i === 0 ? "th" : "td");
+
+                // 링크 칼럼이면 <a> 태그로 변환
+                if (i > 0 && col && col.startsWith("http")) {
+                    const a = document.createElement("a");
+                    a.href = col;
+                    a.target = "_blank";
+                    a.innerText = "링크 열기";
+                    cell.appendChild(a);
+                } else {
+                    cell.innerText = col;
+                }
+
+                tr.appendChild(cell);
+            });
+
+            table.appendChild(tr);
+        });
+
+    } catch (err) {
+        console.error("로드 실패:", err);
+    }
+}
+
+loadSheet();
+</script>
+
+</body>
+</html>
