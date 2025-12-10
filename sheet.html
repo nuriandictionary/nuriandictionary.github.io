@@ -122,7 +122,7 @@ async function loadSheet() {
         }
 
         // ⚡ pubdate → title → link 순서로 재배열
-        const orderedColumns = ["pubdate", "title", "link"];
+        const orderedColumns = ["발행 시간", "뉴스 제목", "원문"];
         const colIndexes = orderedColumns.map(col => headers.indexOf(col));
 
         rows = rows.map(r => colIndexes.map(i => r[i]));
