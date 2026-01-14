@@ -15,15 +15,18 @@
 </script>
 
 <style>
-    
+    /* ===== 공통 기본 ===== */
+    * {
+        box-sizing: border-box;
+    }
 
     body {
         font-family: "Noto Sans KR", sans-serif;
         background: #f5f6fa;
         margin: 0;
         padding: 20px;
-        word-break: break-word;
-        overflow-wrap: break-word;
+        word-break: keep-all;           /* 기존 break-word → 가독성 개선 */
+        overflow-wrap: break-word;      /* 긴 영문/URL 대응 */
     }
 
     h2 {
@@ -31,11 +34,15 @@
         margin-bottom: 20px;
     }
 
+    /* ===== 테이블 컨테이너 ===== */
     .table-container {
         display: flex;
         justify-content: center;
+        overflow-x: auto;               /* 모바일 가로 스크롤 허용 */
+        -webkit-overflow-scrolling: touch;
     }
 
+    /* ===== 테이블 ===== */
     table {
         border-collapse: collapse;
         width: 90%;
@@ -50,6 +57,13 @@
         padding: 12px 15px;
         border-bottom: 1px solid #eee;
         text-align: center;
+        white-space: normal;            /* 줄바꿈 허용 */
+        word-break: break-word;
+    }
+
+    /* 테이블 셀 줄바꿈 핵심 트릭 */
+    td {
+        max-width: 0;
     }
 
     th {
@@ -65,7 +79,25 @@
     tr:hover {
         background: #eaf6ff;
     }
+
+    /* ===== 모바일 대응 ===== */
+    @media (max-width: 768px) {
+        body {
+            padding: 12px;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            text-align: left;            /* 모바일 가독성 개선 */
+            font-size: 14px;
+        }
+    }
 </style>
+
 </head>
 
 <body>
