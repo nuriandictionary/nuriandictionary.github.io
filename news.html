@@ -21,13 +21,18 @@
     }
 
     body {
-        font-family: "Noto Sans KR", sans-serif;
-        background: #f5f6fa;
-        margin: 0;
-        padding: 20px;
-        word-break: keep-all;           /* 기존 break-word → 가독성 개선 */
-        overflow-wrap: break-word;      /* 긴 영문/URL 대응 */
+    font-family: "Noto Sans KR", sans-serif;
+    background: #f5f6fa;
+    margin: 0;
+    padding: 20px;
+
+    box-sizing: border-box;
+    max-width: 100%;
+
+    word-break: keep-all;
+    overflow-wrap: break-word;
     }
+
 
     h2 {
         text-align: center;
