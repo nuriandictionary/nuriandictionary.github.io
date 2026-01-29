@@ -171,10 +171,10 @@ async function loadSheet() {
         const headers = rows[0];
 
         // score 컬럼 제거
-        const scoreIndex = headers.indexOf("score");
-        if (scoreIndex !== -1) {
-            rows = rows.map(r => r.filter((_, i) => i !== scoreIndex));
-        }
+        // const scoreIndex = headers.indexOf("score");
+        // if (scoreIndex !== -1) {
+        //     rows = rows.map(r => r.filter((_, i) => i !== scoreIndex));
+        // }
 
         // ⚡ pubdate → title → link 순서로 재배열
         const orderedColumns = ["발행 시간", "뉴스 제목", "원문", "score"];
