@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>주도주 뉴스</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-235GWGNX1Z"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-235GWGNX1Z');
+</script>
+
+<style>
+    /* ===== 공통 기본 ===== */
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+    font-family: "Noto Sans KR", sans-serif;
+    background: #f5f6fa;
+    margin: 0;
+    padding: 20px;
+
+    box-sizing: border-box;
+    max-width: 100%;
+
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    }
+
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    /* ===== 테이블 컨테이너 ===== */
+    .table-container {
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;               /* 모바일 가로 스크롤 허용 */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ===== 테이블 ===== */
+    table {
+        border-collapse: collapse;
+        width: 90%;
+        max-width: 1200px;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+        white-space: normal;            /* 줄바꿈 허용 */
+        word-break: break-word;
+    }
+
+    /* 테이블 셀 줄바꿈 핵심 트릭 */
+    td {
+        max-width: 0;
+    }
+
+    th {
+        background: #2d98da;
+        color: white;
+        font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+        background: #f8f9fc;
+    }
+
+    tr:hover {
+        background: #eaf6ff;
+    }
+
+    /* ===== 모바일 대응 ===== */
+    @media (max-width: 768px) {
+        body {
+            padding: 12px;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            text-align: left;            /* 모바일 가독성 개선 */
+            font-size: 14px;
+        }
+    }
+</style>
+
+</head>
+
+<body>
+
+<h2>주식시장 핫 뉴스</h2>
+
+<div class="table-container">
+    <table id="sheetTable"></table>
+</div>
+
+<div class="api-credit" style="text-align:center; margin-top:20px;">
+    <a href="http://developers.naver.com" target="_blank">
+        <img src="/assets/img/NAVER_api_1.png" alt="NAVER 오픈 API" style="width:10%;height:auto;" />
+    </a>
+</div>
+
+<script>
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_ZndCE-DtpTm4QxU0vR7jA_vKqYvv3gTL7W4duIqYrB1ZIKa-tmyqmvIP72FUjPtzLgz7HMfXgzJI/pub?gid=233101866&single=true&output=csv";
+
+// CSV 파서
+function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let cell = "";
+    let insideQuote = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (char === '"' && nextChar === '"') {
+            cell += '"';
+            i++;
+        } else if (char === '"') {
+            insideQuote = !insideQuote;
+        } else if (char === ',' && !insideQuote) {
+            row.push(cell);
+            cell = "";
+        } else if (char === '\n' && !insideQuote) {
+            row.push(cell);
+            rows.push(row);
+            row = [];
+            cell = "";
+        } else {
+            cell += char;
+        }
+    }
+
+    if (cell || row.length) {
+        row.push(cell);
+        rows.push(row);
+    }
+
+    return rows;
+}
+
+async function loadSheet() {
+    try {
+        const res = await fetch(sheetURL);
+        const csv = await res.text();
+
+        let rows = parseCSV(csv);
+        const table = document.getElementById("sheetTable");
+
+        // 헤더 추출
+        const headers = rows[0];
+
+        // score 컬럼 제거
+        const scoreIndex = headers.indexOf("score");
+        if (scoreIndex !== -1) {
+            rows = rows.map(r => r.filter((_, i) => i !== scoreIndex));
+        }
+
+        // ⚡ pubdate → title → link 순서로 재배열
+        const orderedColumns = ["발행 시간", "뉴스 제목", "원문"];
+        const colIndexes = orderedColumns.map(col => headers.indexOf(col));
+
+        rows = rows.map(r => colIndexes.map(i => r[i]));
+
+        // 테이블 출력
+        table.innerHTML = "";
+
+        rows.forEach((row, i) => {
+            const tr = document.createElement("tr");
+
+            row.forEach(col => {
+                const cell = document.createElement(i === 0 ? "th" : "td");
+
+                // 링크 칼럼이면 <a> 태그로 변환
+                if (i > 0 && col && col.startsWith("http")) {
+                    const a = document.createElement("a");
+                    a.href = col;
+                    a.target = "_blank";
+                    a.innerText  = "👉";
+                    cell.appendChild(a);
+                } else {
+                    cell.innerText = col;
+                }
+
+                tr.appendChild(cell);
+            });
+
+            table.appendChild(tr);
+        });
+
+    } catch (err) {
+        console.error("로드 실패:", err);
+    }
+}
+
+loadSheet();
+</script>
+
+</body>
+</html>
