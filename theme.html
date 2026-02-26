@@ -88,8 +88,8 @@ tr:hover {
 </div>
 
 <script>
-// const sheetID = "여기에_시트ID_입력";
-const url = `https://docs.google.com/spreadsheets/d/e/2PACX-1vTqJPTQKf_IGq1156ts4-tKnWvm1zqXtqXpiECPyCk_vXSpkMQsF0ZtirnLDHiwD2_iRn1_6i80Kx9E/pub?gid=0&single=true&output=csv`;
+const sheetID = "16pX_MlswXTy7wA1kGcITM2lQfmXxXi4gZ3CKpI3UWpE";
+const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
 
 fetch(url)
     .then(res => res.text())
