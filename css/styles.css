@@ -477,16 +477,6 @@ output {
     justify-content: center;
 }
 
-/* 
-.iframe-wrapper {
-    display: flex;
-}
-
-.iframe-wrapper iframe {
-    width: 50%;
-    height: 600px;
-    border: none;
-} */
 
 
 iframe {
