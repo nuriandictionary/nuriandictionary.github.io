@@ -5,72 +5,100 @@
 <title>테마 상승 현황</title>
 
 <style>
-body {
+    /* ===== 공통 기본 ===== */
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+    font-family: "Noto Sans KR", sans-serif;
+    background: #f5f6fa;
     margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f4f6f9;
-}
-
-.container {
     padding: 20px;
-}
 
-h2 {
-    margin-bottom: 15px;
-}
+    box-sizing: border-box;
+    max-width: 100%;
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    font-size: 14px;
-}
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    }
 
-th {
-    background-color: #1e293b;
-    color: white;
-    padding: 10px;
-    font-weight: 600;
-    position: sticky;
-    top: 0;
-}
 
-td {
-    padding: 8px;
-    border-bottom: 1px solid #e5e7eb;
-    text-align: center;
-}
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
 
-td:first-child {
-    text-align: left;
-    font-weight: 600;
-}
+    /* ===== 테이블 컨테이너 ===== */
+    .table-container {
+        display: flex;
+        justify-content: center;
+        overflow-x: auto;               /* 모바일 가로 스크롤 허용 */
+        -webkit-overflow-scrolling: touch;
+    }
 
-tr:hover {
-    background-color: #f1f5f9;
-}
+    /* ===== 테이블 ===== */
+    table {
+        border-collapse: collapse;
+        width: 90%;
+        margin: 0 auto;
+        max-width: 1200px;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
 
-.positive {
-    color: red;
-    font-weight: bold;
-}
+    th, td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+        text-align: center;
+        white-space: normal;            /* 줄바꿈 허용 */
+        word-break: break-word;
+    }
 
-.negative {
-    color: blue;
-}
+    /* 테이블 셀 줄바꿈 핵심 트릭 */
+    td {
+        max-width: 0;
+    }
 
-.loading {
-    text-align: center;
-    padding: 30px;
-    font-size: 16px;
-}
+    th {
+        background: #2d98da;
+        color: white;
+        font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+        background: #f8f9fc;
+    }
+
+    tr:hover {
+        background: #eaf6ff;
+    }
+
+    /* ===== 모바일 대응 ===== */
+    @media (max-width: 768px) {
+        body {
+            padding: 12px;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            text-align: left;            /* 모바일 가독성 개선 */
+            font-size: 14px;
+        }
+    }
 </style>
 </head>
 
 <body>
 
 <div class="container">
-    <h2>📊 테마 상승 현황</h2>
+    <h2></h2>
     <div id="loading" class="loading">데이터 불러오는 중...</div>
     <table id="themeTable" style="display:none;">
         <thead>
@@ -133,3 +161,4 @@ fetch(url)
 
 </body>
 </html>
+
