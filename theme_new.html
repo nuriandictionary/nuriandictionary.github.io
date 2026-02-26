@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>테마 상승 현황</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+}
+
+.container {
+    padding: 20px;
+}
+
+h2 {
+    margin-bottom: 15px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    font-size: 14px;
+}
+
+th {
+    background-color: #1e293b;
+    color: white;
+    padding: 10px;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+td {
+    padding: 8px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+td:first-child {
+    text-align: left;
+    font-weight: 600;
+}
+
+tr:hover {
+    background-color: #f1f5f9;
+}
+
+.positive {
+    color: red;
+    font-weight: bold;
+}
+
+.negative {
+    color: blue;
+}
+
+.loading {
+    text-align: center;
+    padding: 30px;
+    font-size: 16px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>📊 테마 상승 현황</h2>
+    <div id="loading" class="loading">데이터 불러오는 중...</div>
+    <table id="themeTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>테마명</th>
+                <th>상승률 (%)</th>
+                <th>대표종목</th>
+                <th>전체종목 수</th>
+                <th>상승</th>
+                <th>하락</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+const sheetID = "16pX_MlswXTy7wA1kGcITM2lQfmXxXi4gZ3CKpI3UWpE";
+const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&gid=0`;
+
+fetch(url)
+    .then(res => res.text())
+    .then(data => {
+        const json = JSON.parse(data.substring(47).slice(0, -2));
+        const rows = json.table.rows;
+
+        const tbody = document.querySelector("#themeTable tbody");
+
+        rows.forEach(row => {
+            const tr = document.createElement("tr");
+
+            row.c.forEach((cell, index) => {
+                const td = document.createElement("td");
+                const value = cell ? cell.v : "";
+                td.textContent = value;
+
+                // 상승률 컬럼 색상 처리
+                if (index === 1 && value !== "") {
+                    if (parseFloat(value) > 0) {
+                        td.classList.add("positive");
+                    } else {
+                        td.classList.add("negative");
+                    }
+                }
+
+                tr.appendChild(td);
+            });
+
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("themeTable").style.display = "table";
+    })
+    .catch(error => {
+        document.getElementById("loading").innerText = "데이터를 불러오지 못했습니다.";
+        console.error(error);
+    });
+</script>
+
+</body>
+</html>
