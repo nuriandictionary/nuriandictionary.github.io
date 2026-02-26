@@ -473,6 +473,7 @@ output {
 
 
 .iframe-wrapper {
+  margin: auto;
     display: flex;
     justify-content: center;
 }
