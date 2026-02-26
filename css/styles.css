@@ -472,12 +472,12 @@ output {
 }
 
 
-/* .iframe-wrapper {
+.iframe-wrapper {
     display: flex;
     justify-content: center;
-} */
+}
 
-
+/* 
 .iframe-wrapper {
     display: flex;
 }
@@ -486,7 +486,7 @@ output {
     width: 50%;
     height: 600px;
     border: none;
-}
+} */
 
 
 iframe {
