@@ -472,10 +472,22 @@ output {
 }
 
 
-.iframe-wrapper {
+/* .iframe-wrapper {
     display: flex;
     justify-content: center;
+} */
+
+
+.iframe-wrapper {
+    display: flex;
 }
+
+.iframe-wrapper iframe {
+    width: 50%;
+    height: 600px;
+    border: none;
+}
+
 
 iframe {
     width: 100%;
