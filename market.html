@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>코스피 / 코스닥 시장 비중</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: white;
+        padding: 40px;
+    }
+
+    .market-section {
+        max-width: 900px;
+        margin: 0 auto 50px auto;
+    }
+
+    .title {
+        font-size: 22px;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .bar {
+        display: flex;
+        height: 45px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #333;
+    }
+
+    .segment {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+        white-space: nowrap;
+        transition: width 0.8s ease;
+    }
+
+    .up { background: #e74c3c; }
+    .down { background: #3498db; }
+    .flat { background: #f1c40f; color: black; }
+    .na { background: #7f8c8d; }
+
+
+    .legend {
+    display: flex;
+    justify-content: center;   /* 가운데 정렬 */
+    gap: 40px;                 /* 항목 간 간격 */
+    margin: 20px auto 0 auto;
+    font-size: 14px;
+
+    max-width: 900px;
+    width: 100%;
+    }
+
+
+    .legend div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .color-box {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+    }
+</style>
+</head>
+<body>
+
+<!-- ================= 코스피 ================= -->
+<div class="market-section">
+    <div class="title">📈 코스피 시장</div>
+    <div class="bar">
+        <div class="segment up" id="kospi_up"></div>
+        <div class="segment down" id="kospi_down"></div>
+        <div class="segment flat" id="kospi_flat"></div>
+        <div class="segment na" id="kospi_na"></div>
+    </div>
+</div>
+
+<!-- ================= 코스닥 ================= -->
+<div class="market-section">
+    <div class="title">📊 코스닥 시장</div>
+    <div class="bar">
+        <div class="segment up" id="kosdaq_up"></div>
+        <div class="segment down" id="kosdaq_down"></div>
+        <div class="segment flat" id="kosdaq_flat"></div>
+        <div class="segment na" id="kosdaq_na"></div>
+    </div>
+</div>
+
+<div class="legend">
+    <div><div class="color-box up"></div> 상승</div>
+    <div><div class="color-box down"></div> 하락</div>
+    <div><div class="color-box flat"></div> 보합</div>
+    <div><div class="color-box na"></div> N/A</div>
+</div>
+
+<script>
+    const SHEET_ID = "1-dUZ0XAutAWKmjAUlo9bYp0MrLcfzfIxzilfyvPDQUw";
+    const GID = "1784439954";  // 시트 gid 번호
+
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+
+    async function fetchSheetData() {
+        try {
+            const response = await fetch(url);
+            const csvText = await response.text();
+
+            const rows = csvText.trim().split("\n").map(row => row.split(","));
+
+            // 구조:
+            // 0행: Market,Up,Down,Flat,N/A
+            // 1행: KOSPI,...
+            // 2행: KOSDAQ,...
+
+            const headers = rows[0];
+
+            const kospiRow = rows.find(row => row[0] === "KOSPI");
+            const kosdaqRow = rows.find(row => row[0] === "KOSDAQ");
+
+            const kospi = {
+                up: Number(kospiRow[1]),
+                down: Number(kospiRow[2]),
+                flat: Number(kospiRow[3]),
+                na: Number(kospiRow[4])
+            };
+
+            const kosdaq = {
+                up: Number(kosdaqRow[1]),
+                down: Number(kosdaqRow[2]),
+                flat: Number(kosdaqRow[3]),
+                na: Number(kosdaqRow[4])
+            };
+
+            renderMarket("kospi", kospi);
+            renderMarket("kosdaq", kosdaq);
+
+        } catch (error) {
+            console.error("CSV 데이터 불러오기 실패:", error);
+        }
+    }
+
+    function renderMarket(prefix, data) {
+        const total = data.up + data.down + data.flat + data.na;
+
+        function set(id, value) {
+            const percent = ((value / total) * 100).toFixed(1);
+            const el = document.getElementById(prefix + "_" + id);
+
+            el.style.width = percent + "%";
+            el.textContent = percent > 5 ? percent + "%" : "";
+        }
+
+        set("up", data.up);
+        set("down", data.down);
+        set("flat", data.flat);
+        set("na", data.na);
+    }
+
+    fetchSheetData();
+</script>
+
+</body>
+</html>
+
