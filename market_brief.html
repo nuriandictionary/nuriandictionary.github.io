@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>뉴스 리스트</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#0f1117;
+    color:white;
+    margin:0;
+    padding:40px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.news-item{
+    padding:14px 18px;
+    border-bottom:1px solid #333;
+}
+
+.news-item a{
+    text-decoration:none;
+    color:#4da3ff;
+    font-size:16px;
+}
+
+.news-item a:hover{
+    text-decoration:underline;
+}
+
+.date{
+    color:#aaa;
+    margin-right:10px;
+}
+
+.loading{
+    text-align:center;
+    color:#aaa;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📰금융 브리프</h1>
+
+<div id="news">
+<div class="loading">불러오는 중...</div>
+</div>
+
+</div>
+
+
+<script>
+
+const SHEET_ID = "1K34pTXGn9spjgvSovVnmpACvFeWXDS-dmkiPA9COsJI";
+const GID = "1815431411";
+
+const url =`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
+
+fetch(url)
+.then(res => res.text())
+.then(data => {
+
+const json = JSON.parse(data.substring(47).slice(0,-2));
+
+const rows = json.table.rows;
+
+const container = document.getElementById("news");
+
+container.innerHTML="";
+
+rows.forEach(r=>{
+
+const title = r.c[0]?.v;
+const link = r.c[1]?.v;
+
+if(!title || !link) return;
+
+const div = document.createElement("div");
+div.className="news-item";
+
+div.innerHTML =
+`<a href="${link}" target="_blank">${title}</a>`;
+
+container.appendChild(div);
+
+});
+
+});
+
+</script>
+
+</body>
+</html>
+
