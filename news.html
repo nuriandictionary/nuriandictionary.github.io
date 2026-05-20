@@ -59,6 +59,20 @@
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
 
+
+        
+    .time{
+        width:15%;
+    }
+    
+    .title{
+        width:75%;
+    }
+    
+    .link{
+        width:10%;
+    }
+  
     th, td {
         padding: 12px 15px;
         border-bottom: 1px solid #eee;
@@ -137,17 +151,21 @@ function parseCSV(text) {
         if (char === '"' && nextChar === '"') {
             cell += '"';
             i++;
-        } else if (char === '"') {
+        }
+        else if (char === '"') {
             insideQuote = !insideQuote;
-        } else if (char === ',' && !insideQuote) {
+        }
+        else if (char === ',' && !insideQuote) {
             row.push(cell);
             cell = "";
-        } else if (char === '\n' && !insideQuote) {
+        }
+        else if (char === '\n' && !insideQuote) {
             row.push(cell);
             rows.push(row);
             row = [];
             cell = "";
-        } else {
+        }
+        else {
             cell += char;
         }
     }
@@ -171,51 +189,86 @@ async function loadSheet() {
         // 헤더 추출
         const headers = rows[0];
 
-        // score 컬럼 제거
+        // score 제거
         const scoreIndex = headers.indexOf("score");
+
         if (scoreIndex !== -1) {
-            rows = rows.map(r => r.filter((_, i) => i !== scoreIndex));
+            rows = rows.map(r =>
+                r.filter((_, i) => i !== scoreIndex)
+            );
         }
 
-        // ⚡ pubdate → title → link 순서로 재배열
-        const orderedColumns = ["발행 시간", "뉴스 제목", "원문"];
-        const colIndexes = orderedColumns.map(col => headers.indexOf(col));
+        // 원하는 순서
+        const orderedColumns = [
+            "발행 시간",
+            "뉴스 제목",
+            "원문"
+        ];
 
-        rows = rows.map(r => colIndexes.map(i => r[i]));
+        const colIndexes = orderedColumns.map(
+            col => headers.indexOf(col)
+        );
 
-        // 테이블 출력
+        rows = rows.map(
+            r => colIndexes.map(i => r[i])
+        );
+
         table.innerHTML = "";
 
-        rows.forEach((row, i) => {
+        rows.forEach((row, rowIndex) => {
+
             const tr = document.createElement("tr");
 
-            row.forEach(col => {
-                const cell = document.createElement(i === 0 ? "th" : "td");
+            row.forEach((col, colIndex) => {
 
-                // 링크 칼럼이면 <a> 태그로 변환
-                if (i > 0 && col && col.startsWith("http")) {
+                const cell = document.createElement(
+                    rowIndex === 0 ? "th" : "td"
+                );
+
+                // 열별 class 부여
+                if (colIndex === 0){
+                    cell.classList.add("time");
+                }
+                else if (colIndex === 1){
+                    cell.classList.add("title");
+                }
+                else if (colIndex === 2){
+                    cell.classList.add("link");
+                }
+
+                // 링크 컬럼
+                if (
+                    rowIndex > 0 &&
+                    colIndex === 2 &&
+                    col &&
+                    col.startsWith("http")
+                ) {
                     const a = document.createElement("a");
                     a.href = col;
                     a.target = "_blank";
-                    a.innerText  = "👉";
+                    a.innerText = "👉";
+
                     cell.appendChild(a);
+
                 } else {
                     cell.innerText = col;
                 }
 
                 tr.appendChild(cell);
+
             });
 
             table.appendChild(tr);
+
         });
 
-    } catch (err) {
+    } catch(err) {
         console.error("로드 실패:", err);
     }
 }
 
 loadSheet();
 </script>
-
+  
 </body>
 </html>
