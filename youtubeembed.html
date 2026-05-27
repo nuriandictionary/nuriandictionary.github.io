@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+
+<style>
+body{
+    margin:30px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-family:Arial, sans-serif;
+}
+
+.video-list{
+    display:flex;
+    flex-direction:column;
+    gap:150px; /* 영상 사이 간격 */
+}
+
+.video-item{
+    text-align:center;
+}
+
+.video-container{
+    width:800px;
+    aspect-ratio:16/9;
+}
+
+.video-container iframe{
+    width:100%;
+    height:100%;
+    border:none;
+}
+
+h2{
+    margin-bottom:15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="video-list">
+
+    
+
+    <div class="video-item">
+        
+        <div class="video-container">
+            <iframe
+                src="https://www.youtube.com/embed/EUuflDi0kWY"
+                allowfullscreen>
+            </iframe>
+        </div>
+        <h2>The law of large numbers</h2>
+    </div>
+
+    <div class="video-item">
+        
+        <div class="video-container">
+            <iframe
+                src="https://www.youtube.com/embed/4gaaGDldQwY"
+                allowfullscreen>
+            </iframe>
+        </div>
+        <h2>Loss-aversion, how our brain works in trading</h2>
+    </div>
+
+    <div class="video-item">
+        
+        <div class="video-container">
+            <iframe
+                src="https://www.youtube.com/embed/FOVUpRC9j2k"
+                allowfullscreen>
+            </iframe>
+        </div>
+        <h2>Consistency matters</h2>
+    </div>
+
+</div>
+
+</body>
+</html>
+
