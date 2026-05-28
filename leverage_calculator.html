@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>연속 손실 계산기</title>
+
+<style>
+    body{
+        font-family: Arial, sans-serif;
+        background:#f4f4f4;
+        padding:40px;
+    }
+
+    .container{
+        max-width:600px;
+        margin:auto;
+        background:white;
+        padding:30px;
+        border-radius:12px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1{
+        margin-bottom:25px;
+    }
+
+    .input-group{
+        margin-bottom:20px;
+    }
+
+    label{
+        display:block;
+        margin-bottom:8px;
+        font-weight:bold;
+    }
+
+    input{
+        width:100%;
+        padding:12px;
+        font-size:16px;
+        border:1px solid #ccc;
+        border-radius:8px;
+        box-sizing:border-box;
+    }
+
+    button{
+        width:100%;
+        padding:14px;
+        font-size:18px;
+        border:none;
+        border-radius:8px;
+        background:#222;
+        color:white;
+        cursor:pointer;
+    }
+
+    button:hover{
+        opacity:0.9;
+    }
+
+    .result{
+        margin-top:30px;
+        padding:20px;
+        background:#f7f7f7;
+        border-radius:10px;
+        font-size:18px;
+        line-height:1.8;
+    }
+
+    .formula{
+        margin-top:20px;
+        font-size:15px;
+        color:#555;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>연속 손실 계산기</h1>
+
+    <div class="input-group">
+        <label>초기 원금</label>
+        <input type="number" id="capital" value="100">
+    </div>
+
+    <div class="input-group">
+        <label>매수 배수 (l)</label>
+        <input type="number" step="0.1" id="leverage" value="3">
+    </div>
+
+    <div class="input-group">
+        <label>스탑로스 % (s)</label>
+        <input type="number" step="0.1" id="stoploss" value="0.8">
+    </div>
+
+    <div class="input-group">
+        <label>증거금률 % (m)</label>
+        <input type="number" step="0.1" id="margin" value="25">
+    </div>
+
+    <button onclick="calculate()">계산하기</button>
+
+    <div class="result" id="result">
+        결과가 여기에 표시됩니다.
+    </div>
+
+</div>
+
+<script>
+
+function calculate(){
+
+    const capital = parseFloat(document.getElementById('capital').value);
+    const l = parseFloat(document.getElementById('leverage').value);
+    const s = parseFloat(document.getElementById('stoploss').value);
+    const m = parseFloat(document.getElementById('margin').value);
+
+    // 공식
+    const numerator = capital - (l * m);
+    const denominator = l * s;
+
+    const failCount = Math.floor(numerator / denominator) + 1;
+
+    const lossPerTrade = capital * l * (s / 100);
+    const requiredMargin = capital * l * (m / 100);
+
+    document.getElementById('result').innerHTML = `
+        <b>1회 손실 금액:</b> ${lossPerTrade.toFixed(2)}<br>
+        <b>필요 증거금:</b> ${requiredMargin.toFixed(2)}<br><br>
+
+        <b>${failCount}회 연속 손실 시</b><br>
+        더 이상 동일 규모 매수가 불가능합니다.
+        
+        <div class="formula">
+            공식:<br>
+            n = floor((100 - l×m) / (l×s)) + 1
+        </div>
+    `;
+}
+
+calculate();
+
+</script>
+
+</body>
+</html>
