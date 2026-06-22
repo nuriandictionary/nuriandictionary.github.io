@@ -8,10 +8,28 @@
 body{
     font-family:sans-serif;
     background:#f5f5f5;
+    margin:20px;
 }
 
-h1{
+.header{
+    display:flex;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.header h1{
+    flex:1;
     text-align:center;
+    margin:0;
+}
+
+#today{
+    flex:1;
+    text-align:right;
+    padding-right:10%;
+    padding-top:10px;
+    font-size:20px;
+    font-weight:bold;
 }
 
 .buttons{
@@ -56,17 +74,23 @@ button{
 
 <body>
 
-<!-- <h1>뭐살까</h1> -->
+<div class="header">
+
+    <!-- <h1>뭐살까</h1> -->
+
+    <div id="today"></div>
+
+</div>
 
 <div class="buttons">
 
-<button onclick="loadStocks(1273627440)">
-눌림매매
-</button>
+    <button onclick="loadStocks(1273627440)">
+        눌림매매
+    </button>
 
-<button onclick="loadStocks(710038992)">
-돌파매매
-</button>
+    <button onclick="loadStocks(710038992)">
+        돌파매매
+    </button>
 
 </div>
 
@@ -87,34 +111,49 @@ async function loadStocks(gid){
 
         const rows = csv.trim().split("\n");
 
+
+        // ===== I1 날짜 표시 =====
+        if(rows.length > 0){
+
+            const date = rows[0]
+                .split(",")[8]
+                ?.trim()
+                .replace(/"/g,"")
+                .replace(/'/g,"");
+
+            document.getElementById("today").innerHTML = date;
+        }
+
+
+        // ===== 종목 카드 생성 =====
         let html = "";
 
         rows.forEach(row => {
 
             const cols = row.split(",");
 
-            if(cols.length < 2) return;
-
             const code = cols[0]
-                .trim()
-                .replace(/"/g,"")
-                .replace(/'/g,"")
-                .padStart(6, "0");
-
-                
-            const image = cols[1]
-                .trim()
+                ?.trim()
                 .replace(/"/g,"")
                 .replace(/'/g,"");
+
+            const image = cols[1]
+                ?.trim()
+                .replace(/"/g,"")
+                .replace(/'/g,"");
+
+            // 종목코드나 이미지가 없으면 건너뜀
+            if(!code || !image) return;
 
             html += `
             <div class="stock">
 
-                <h2>${code}</h2>
+                <h2>${code.padStart(6,"0")}</h2>
 
-                <img src="${image}"
-                     alt="${code}"
-                     loading="lazy">
+                <img
+                    src="${image}"
+                    alt="${code}"
+                    loading="lazy">
 
             </div>
             `;
@@ -133,10 +172,13 @@ async function loadStocks(gid){
 
 }
 
-// 처음 열 때 자동 실행
+
+// 처음 열 때 자동으로 눌림매매 로드
 loadStocks(1273627440);
 
 </script>
 
 </body>
 </html>
+
+
