@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>버핏지수 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  body {
+    font-family: Arial;
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  canvas {
+    max-width: 1100px;
+    width: 100%;
+  }
+</style>
+</head>
+
+<body>
+
+  <h2>버핏지수 (MarketCap / GDP × 100)</h2>
+  <h4>GDP는 IMF의 한국 명목GDP 2026년말 예상치값 1930 Billion Dollars 기준,  환율은 1520원 기준,<br>
+  MarketCap은 한국거래소의 일별 코스피시총 + 코스닥시총 + 코넥스시총을 합산한 수치임</h4>
+  <canvas id="chart"></canvas>
+
+  <script>
+
+    // ===============================
+    // 1. 구글시트 CSV URL
+    // ===============================
+    const SHEET_URL =
+    "https://docs.google.com/spreadsheets/d/1DTmUxYucDWge4wZDUcGJRZQ5KSM-wpsJkxfn48WfA4E/gviz/tq?tqx=out:csv&sheet=시트4";
+
+    // ===============================
+    // 2. GDP 설정
+    // ===============================
+    const exch = 1520; // 환율
+    const gdpindollar = 1930e9; // imf gdp forcast
+    const GDP = gdpindollar * exch; // 필요 시 수정
+
+    // ===============================
+    // 3. 숫자 정리 (콤마/따옴표/E표기 완전 처리)
+    // ===============================
+    function cleanNumber(v) {
+      if (!v) return null;
+
+      const n = Number(
+        String(v)
+          .replace(/,/g, "")     // 천단위 콤마 제거
+          .replace(/"/g, "")     // 따옴표 제거
+          .trim()
+      );
+
+      return isNaN(n) ? null : n;
+    }
+
+    // ===============================
+    // 4. CSV 파싱 (정규식 기반 - 핵심)
+    // ===============================
+    function parseCSV(text) {
+      const lines = text.trim().split("\n");
+
+      return lines.slice(1).map(line => {
+
+        // "date","marketcap" 구조 안전 추출
+        const match = line.match(/"([^"]+)"\s*,\s*"([^"]+)"/);
+
+        if (!match) return null;
+
+        return {
+          date: match[1],
+          marketcap: cleanNumber(match[2])
+        };
+
+      }).filter(Boolean);
+    }
+
+    // ===============================
+    // 5. 데이터 로딩
+    // ===============================
+    async function loadData() {
+      try {
+        const res = await fetch(SHEET_URL);
+        const csv = await res.text();
+
+        console.log("RAW CSV:", csv);
+
+        const data = parseCSV(csv);
+
+        console.log("PARSED DATA:", data);
+
+        const labels = data.map(d => d.date);
+        const buffet = data.map(d => (d.marketcap / GDP) * 100);
+        const baseline = data.map(() => 100);
+
+        drawChart(labels, buffet, baseline);
+
+      } catch (err) {
+        console.error("ERROR:", err);
+      }
+    }
+
+    // ===============================
+    // 6. 차트 렌더링
+    // ===============================
+    function drawChart(labels, buffet, baseline) {
+
+      const ctx = document.getElementById("chart");
+
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "버핏지수",
+              data: buffet,
+              borderColor: "blue",
+              tension: 0.25,
+              pointRadius: 2
+            },
+            {
+              label: "기준선",
+              data: baseline,
+              borderColor: "red",
+              borderDash: [6, 6],
+              pointRadius: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          interaction: {
+            mode: "index",
+            intersect: false
+          },
+          scales: {
+            y: {
+              title: {
+                display: true,
+                text: "Buffett Index"
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: "Date"
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // 실행
+    loadData();
+
+  </script>
+
+</body>
+</html>
+
+
