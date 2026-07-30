@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>국제 금융 뉴스</title>
+
+<style>
+
+h2{
+    text-align: center;
+    font-size: 40px;
+}
+
+
+body{
+    max-width:900px;
+    margin:40px auto;
+    padding:20px;
+    font-family:Arial, sans-serif;
+    background:#2b2b2b;
+}
+
+
+.news-item{
+    background:white;
+    border-radius:8px;
+    margin-bottom:12px;
+    overflow:hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.news-title{
+    width:100%;
+    text-align:left;
+    padding:18px;
+    font-size:22px;
+    border:none;
+    background:white;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.news-title:hover{
+    background:#f0f4ff;
+}
+
+.news-content{
+
+    display:none;
+    font-size:20px;
+    padding:18px;
+
+    white-space:pre-wrap;
+    line-height:1.6;
+    border-top:1px solid #ddd;
+    background:#fafafa;
+}
+
+.read-btn{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    width:fit-content;
+    margin:15px auto 0;
+    padding:8px 14px;
+
+    font-size:13px;
+    line-height:1;
+
+    background:gray;
+    color:white;
+    text-decoration:none;
+    border-radius:4px;
+    box-sizing:border-box;
+}
+
+.read-btn:hover{
+    background:#1d4ed8;
+}
+
+
+/* -----------------------------
+   태블릿
+----------------------------- */
+@media (max-width:768px){
+
+    body{
+        margin:20px auto;
+        padding:15px;
+    }
+
+    h2{
+        font-size:24px;
+        text-align: center;
+        
+    }
+
+    .news-title{
+        font-size:17px;
+        padding:16px;
+        line-height:1.5;
+    }
+
+    .news-content{
+        padding:16px;
+        font-size:15px;
+        line-height:1.8;
+    }
+
+    .read-btn{
+        width:100%;
+        box-sizing:border-box;
+        text-align:center;
+        padding:14px;
+        font-size:15px;
+    }
+
+}
+
+
+/* -----------------------------
+   스마트폰
+----------------------------- */
+@media (max-width:480px){
+
+    body{
+        margin:10px auto;
+        padding:10px;
+    }
+
+    h2{
+        font-size:21px;
+        margin-bottom:15px;
+        text-align: center;
+    }
+
+    .news-item{
+        border-radius:6px;
+    }
+
+    .news-title{
+        padding:15px;
+        font-size:16px;
+        line-height:1.5;
+    }
+
+    .news-content{
+        padding:15px;
+        font-size:14px;
+        line-height:1.8;
+    }
+
+    .read-btn{
+        display:block;
+        width:100%;
+        padding:13px;
+        margin-top:18px;
+        font-size:14px;
+        border-radius:5px;
+    }
+
+}
+</style>
+
+</head>
+<body>
+
+<h2></h2>
+
+<div id="newsList"></div>
+
+<script>
+
+////////////////////////////////////////////////////////////
+// 공개된 구글시트 CSV 주소
+////////////////////////////////////////////////////////////
+
+const sheetURL =
+"https://docs.google.com/spreadsheets/d/1K34pTXGn9spjgvSovVnmpACvFeWXDS-dmkiPA9COsJI/gviz/tq?tqx=out:csv&sheet=market_brief_new";
+
+async function loadNews(){
+
+    const res = await fetch(sheetURL);
+
+    const text = await res.text();
+
+    const rows = parseCSV(text);
+
+    const list = document.getElementById("newsList");
+
+    // 첫 줄은 헤더
+    rows.slice(1).forEach(row => {
+
+    const title = row[0];
+    const link = row[1];
+    const content = row[2].trim();
+
+    const div = document.createElement("div");
+    div.className = "news-item";
+
+    div.innerHTML = `
+    <div class="news-item">
+        <button class="news-title">${title}</button>
+
+        <div class="news-content">${content.trim()}
+
+        <br>
+
+        <a class="read-btn" href="${link}" target="_blank">본문 보기</a>
+
+    </div>
+    </div>`;
+
+        list.appendChild(div);
+
+    });
+
+    document.querySelectorAll(".news-title").forEach(btn => {
+
+        btn.addEventListener("click", function () {
+
+            const content = this.nextElementSibling;
+
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                content.style.display = "block";
+            }
+
+        });
+
+    });
+}
+
+
+////////////////////////////////////////////////////////////
+// CSV 파서 (쉼표와 따옴표 처리)
+////////////////////////////////////////////////////////////
+
+function parseCSV(text){
+
+    const rows=[];
+    let row=[];
+    let current="";
+    let inside=false;
+
+    for(let i=0;i<text.length;i++){
+
+        const c=text[i];
+
+        if(c=='"'){
+
+            if(inside && text[i+1]=='"'){
+                current+='"';
+                i++;
+            }else{
+                inside=!inside;
+            }
+
+        }
+
+        else if(c==',' && !inside){
+
+            row.push(current);
+            current="";
+
+        }
+
+        else if((c=='\n') && !inside){
+
+            row.push(current);
+            rows.push(row);
+
+            row=[];
+            current="";
+
+        }
+
+        else if(c!='\r'){
+
+            current+=c;
+
+        }
+
+    }
+
+    row.push(current);
+
+    rows.push(row);
+
+    return rows;
+
+}
+
+loadNews();
+
+</script>
+
+</body>
+</html>
